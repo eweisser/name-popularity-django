@@ -1,0 +1,87 @@
+body {
+  font-family: "Calibri", sans-serif;
+  margin: 10px 20px;
+}
+
+div {
+  padding: 1px 20px 5px 10px;
+}
+
+input[type=submit] {
+  margin-left: 15px;
+  margin-top: 5px;
+}
+
+#interfaceContainer {
+  width: 90vw;
+  background-color: #FFF;
+}
+
+/* .interface {
+  display: none;
+  width: 90%;
+  background-color: #F4F4F4;
+  padding: 10px;
+} */
+
+div#oneNameMap {
+  background-color: #F4FFF4;
+  /* padding: 1px 20px 0 10px; */
+}
+
+div#oneStateNameReport {
+  background-color: #F4F4FF;
+  display: none;
+  /* padding: 1px 20px 0 10px; */
+}
+
+div#oneYearHundredNamesMap {
+  background-color: #FFF4FF;
+  display: none;
+  /* padding: 1px 20px 0 10px; */
+}
+
+div#oneYearAllStatesComparisonReport {
+  background-color: #FFF0F0;
+  display: none;
+  /* padding: 1px 20px 0 10px; */
+}
+
+div#allStatesToOneStateMap {
+  background-color: #FFF8F0;
+  display: none;
+  /* padding: 1px 20px 0 10px; */
+}
+
+div#results {
+  margin-left: 15px;
+  margin-top: 10px;
+}
+
+p {
+  margin: 5px;
+}
+
+#tabContainer {
+  width: 90vw;
+  /* background-color: #FAA; */
+  border-bottom: 2px solid black;
+  /* margin-bottom: 15px; */
+}
+
+.tab {
+  /* background-color: #AFA; */
+  border-top: 1px solid black;
+  border-right: 1px solid black;
+  margin-right: 10px;
+  padding-right: 5px;
+  /* margin-bottom: 15px; */
+}
+
+td {
+  margin: 10px;
+}
+
+.blueRow {
+  background-color: #f4f4ff;
+}

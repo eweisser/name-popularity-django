@@ -1,0 +1,207 @@
+<html>
+<head>
+  <title>Django project!</title>
+
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'names/style.css' %}">
+
+  <script>
+
+  function activateTab(tabToActivate) {
+    switch(tabToActivate) {
+      case 'one name':
+        document.getElementById("oneNameMap").style.display = "block";
+        document.getElementById("oneStateNameReport").style.display = "none";
+        document.getElementById("oneYearHundredNamesMap").style.display = "none";
+        document.getElementById("oneYearAllStatesComparisonReport").style.display = "none";
+        document.getElementById("allStatesToOneStateMap").style.display = "none";
+        break;
+      case 'one state':
+        document.getElementById("oneNameMap").style.display = "none";
+        document.getElementById("oneStateNameReport").style.display = "block";
+        document.getElementById("oneYearHundredNamesMap").style.display = "none";
+        document.getElementById("oneYearAllStatesComparisonReport").style.display = "none";
+        document.getElementById("allStatesToOneStateMap").style.display = "none";
+        break;
+      case 'num 3':
+        document.getElementById("oneNameMap").style.display = "none";
+        document.getElementById("oneStateNameReport").style.display = "none";
+        document.getElementById("oneYearHundredNamesMap").style.display = "block";
+        document.getElementById("oneYearAllStatesComparisonReport").style.display = "none";
+        document.getElementById("allStatesToOneStateMap").style.display = "none";
+        break;
+      case 'num 4':
+        document.getElementById("oneNameMap").style.display = "none";
+        document.getElementById("oneStateNameReport").style.display = "none";
+        document.getElementById("oneYearHundredNamesMap").style.display = "none";
+        document.getElementById("oneYearAllStatesComparisonReport").style.display = "block";
+        document.getElementById("allStatesToOneStateMap").style.display = "none";
+        break;
+      case 'num 5':
+        document.getElementById("oneNameMap").style.display = "none";
+        document.getElementById("oneStateNameReport").style.display = "none";
+        document.getElementById("oneYearHundredNamesMap").style.display = "none";
+        document.getElementById("oneYearAllStatesComparisonReport").style.display = "none";
+        document.getElementById("allStatesToOneStateMap").style.display = "block";
+        break;
+    }
+  }
+
+  </script>
+
+</head>
+
+<body>
+
+<h1>The first names project</h1>
+
+<div id="tabContainer">
+  <span class="tab" id="tabOneName" onclick="activateTab('one name')">Map one name</span>
+  <span class="tab" id="tabOneState" onclick="activateTab('one state')">List for 1 state/1 year</span>
+  <span class="tab" id="tabNum3" onclick="activateTab('num 3')">Map top names for one year</span>
+  <span class="tab" id="tabNum4" onclick="activateTab('num 4')">Which states are most similar?</span>
+  <span class="tab" id="tabNum5" onclick="activateTab('num 5')">Map similarity to one state</span>
+</div>
+
+<div id="interfaceContainer">
+  <div class="interface" id="oneNameMap">
+
+    <h3>Make a still or animated map for one name</h3>
+
+    <form action="" method="POST">
+      {% csrf_token %}
+      {{ form1 }}
+      <input type="submit" name="submitButtonForm1" value="Submit">
+    </form>
+
+    Leave both <b>year</b> fields blank to get data from entire available range. Leave one <b>year</b> field blank to make a map for data from one year only.<br><br>
+
+  </div>
+
+  <div class="interface" id="oneStateNameReport">
+
+    <h3>List the RSPD values for one state in one year</h3>
+
+    <form action="" method="POST">
+      {% csrf_token %}
+      {{ form2 }}
+      <input type="submit" name="submitButtonForm2" value="Submit">
+    </form>
+
+    Leave <b>sex</b> field blank to get all names.<br><br>
+
+  </div>
+
+  <div class="interface" id="oneYearHundredNamesMap">
+
+    <h3>Make maps showing the distribution of the top names for one year</h3>
+
+    <form action="" method="POST">
+      {% csrf_token %}
+      {{ form3 }}
+      <input type="submit" name="submitButtonForm3" value="Submit">
+    </form>
+
+  </div>
+
+  <div class="interface" id="oneYearAllStatesComparisonReport">
+
+    <h3>Get a table comparing each state to each other state in one year</h3>
+
+    <form action="" method="POST">
+      {% csrf_token %}
+      {{ form4 }}
+      <input type="submit" name="submitButtonForm4" value="Submit">
+    </form>
+
+    This operation requires time-consuming statistical analysis; I recommend using no more than ten names for it.<br><br>
+
+  </div>
+
+  <div class="interface" id="allStatesToOneStateMap">
+
+    <h3>Make a map comparing each state's naming patterns to one focal state</h3>
+
+    <form action="" method="POST">
+      {% csrf_token %}
+      {{ form5 }}
+      <input type="submit" name="submitButtonForm5" value="Submit">
+    </form>
+
+  </div>
+</div>
+
+
+<div id="results">
+  {% if operationID == 1 %}
+    {% if record_list %}                      <!-- if there are any results -->
+      {% for item in maps.items %}                  <!-- go through each record -->
+        <h2>{{ record_list.0.fname }} in {{ item.0 }}</h2>
+        <div class="svgDisplay">
+          {{ item.1 |safe}}
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No matching records found.</p>
+    {% endif %}
+  {% endif %}
+
+  {% if operationID == 2 %}
+    {% if record_list %}                      <!-- if there are any results -->
+        <h2>{{ record_list.0.state }} in {{ record_list.0.year }}</h2>
+        <table>
+          <tr>
+            <td style='padding: 0 20px 3px 15px'><b>Name</b></td>
+            <td style='padding: 0 20px 3px 15px'><b>Z-value</b></td>
+          </tr>
+          {% for record in record_list %}       <!-- go through each record -->
+            <tr class="{% autoescape off %}{% cycle 'blueRow' 'whiteRow' %}{% endautoescape %}">
+              <td style='padding: 0 20px 0 15px'>{{ record.fname }}</td>
+              <td style='padding: 0 20px 0 15px'>{{ record.rspd | floatformat:3 }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+    {% else %}
+      <p>No matching records found.</p>
+    {% endif %}
+  {% endif %}
+
+  {% if operationID == 3 %}
+    {% if record_list %}                      <!-- if there are any results -->
+      {% for item in maps.items %}                  <!-- go through each record -->
+        <h2>{{ item.0 }} in {{ record_list.0.year }}</h2>
+        <div class="svgDisplay">
+          {{ item.1 | safe }}
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No matching records found.</p>
+    {% endif %}
+  {% endif %}
+
+  {% if operationID == 4 %}
+    {% if differenceList %}                      <!-- if there are any results -->
+      <h2>{{ year }}</h2>
+      <table>
+        {% for record in differenceList %}       <!-- go through each record -->
+        <tr>
+          <!-- <td style='padding: 0 20px 0 15px'>{{ record }}</td> -->
+          <td style='padding: 0 20px 0 15px'>{{ record.0 }}</td>
+          <td style='padding: 0 20px 0 15px'>{{ record.1 }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p>No matching records found.</p>
+    {% endif %}
+  {% endif %}
+
+  {% if operationID == 5 %}
+      <h1>Operation ID is 5!!!!!!!!!!!!!!</h1>
+  {% endif %}
+
+</div>
+
+
+</body>
+</html>
