@@ -3,14 +3,17 @@ from django.template import loader
 from django.shortcuts import render
 from django.http import Http404
 from django.urls import reverse
+from django.conf import settings
+import os
+import json
 
 from .models import Rspdtable
 from .forms import oneNameMapForm, oneStateNameReportForm
 from .forms import oneYearHundredNamesMapForm, oneYearAllStatesComparisonReportForm, allStatesToOneStateMapForm
 
 all50States = ['AK','AL','AR','AZ','CA','CO','CT','DE','FL','GA','HI','IA','ID','IL','IN','KS','KY','LA','MA','MD','ME','MI','MN','MO','MS','MT','NC','ND','NE','NH','NJ','NM','NV','NY','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VA','VT','WA','WI','WV','WY']
-defaultInitialYear = 1968
-defaultFinalYear = 2010
+defaultInitialYear = 1931
+defaultFinalYear = 2020
 
 def index(request):
     print()
@@ -102,16 +105,18 @@ def index(request):
             if snumLimit:
                 pass
             else:
-                snumLimit = "20"
-            getMostPopularNames = calculateMostPopularNames(record_list, int(snumLimit))
+                snumLimit = "3"
+            # print(os.path.join(settings.BASE_DIR, 'names\static\\names\\top_names_json.json') )
+            # with open(settings.BASE_DIR.join('') ) as file:
+            getMostPopularNames = calculateMostPopularNames(syear1,ssex,int(snumLimit))
             print(getMostPopularNames)
             # Operation 3 requires a second db table--providing at the very least, a list of the 100 most popular names for each year!
 
         if "submitButtonForm4" in request.POST:
-            differenceList = statePairs(record_list, int(snumLimit))
+            differenceList = statePairs(record_list, syear1, int(snumLimit))
 
         if "submitButtonForm5" in request.POST:
-            differenceList = statePairsOneState(sstate, record_list, int(snumLimit))
+            differenceList = statePairsOneState(sstate, record_list, syear1, int(snumLimit))
 
         context = {
             'form': form.as_p(),
@@ -136,6 +141,13 @@ def index(request):
                 svgFile = svgFileGenerator(svgInsert,nameToMap)
                 context['maps'][str(nameToMap)] = svgFile
 
+        if "submitButtonForm5" in request.POST:
+            context['maps'] = {}
+            record_list = simulateRecordList(differenceList)
+            svgInsert = svgCodeGenerator(record_list,str(syear1))
+            svgFile = svgFileGenerator(svgInsert,str(syear1))
+            context['maps'][str(syear1)] = svgFile
+
         if "submitButtonForm1" in request.POST:
             context['operationID'] = 1
             print("Still to work on: Animated .gif maps?")
@@ -147,7 +159,6 @@ def index(request):
             # templateToGet = 'names/oneStateNameReport.html'
         elif "submitButtonForm3" in request.POST:
             context['operationID'] = 3
-            print("Still to work on: Database table/object model with absolutely popular names")
             # templateToGet = 'names/oneYearHundredNamesMap.html'
         elif "submitButtonForm4" in request.POST:
             context['operationID'] = 4
@@ -170,6 +181,15 @@ def test(request):
     return HttpResponse("Yep, this is a test.")
 
 def svgCodeGenerator(record_list, uniquifier):
+    # print("Here:")
+    # print(record_list[0])
+    # print(record_list[0].state)
+    # print(record_list[0].fname)
+    # print(record_list[0].year)
+    # print(record_list[0].rspd)
+
+    # For operation #5, I need to make the results into a record list so they can be mapped like the other records.
+
     red4 = []
     red3 = []
     red2 = []
@@ -182,6 +202,12 @@ def svgCodeGenerator(record_list, uniquifier):
     grayNED = []
     svgInsert = ""
     for record in record_list:
+        # print(record)
+        # print(record.year)
+        # print(record.state)
+        # print(record.fname)
+        # print(record.rspd)
+        # print()
         stateAndYear = record.state + uniquifier
         if record.rspd > 1.75:
             red4.append(stateAndYear)
@@ -266,7 +292,7 @@ def findDistinctNames(record_list):
             distinctNames.append(record.fname)
     return distinctNames
 
-def statePairs(record_list, howMany):
+def statePairs(record_list, year, howMany):
     # if a difference can actually be calculated for a pair of states for AT LEAST one name, it will be produce a value for the averages (at least one 'green light'). Otherwise, the variable 'comboAverage' remains at 0.
 
     # How does this function work? (Nov 11 2021)
@@ -292,29 +318,30 @@ def statePairs(record_list, howMany):
     allSimils = {}
     differenceList = []
     # distinctNames = findDistinctNames(record_list)
-    twelveNamesFrom1986 = ["Jessica","Ashley","Amanda","Jennifer","Sarah","Stephanie","Nicole","Brittany","Heather","Elizabeth","Megan","Melissa"]
-    namesToUse = twelveNamesFrom1986[0:howMany]
-    print("Checkpoint 1")
+    namesToUse = calculateMostPopularNames(year,"F",howMany)
+    # twelveNamesFrom1986 = ["Jessica","Ashley","Amanda","Jennifer","Sarah","Stephanie","Nicole","Brittany","Heather","Elizabeth","Megan","Melissa"]
+    # namesToUse = twelveNamesFrom1986[0:howMany]
+    # print("Checkpoint 1")
     for name in namesToUse:
         distinctStates = []
         similsForOneName = {}
         one_name_list = record_list.filter(fname=name)
-        print(one_name_list)
-        input()
-        print("Checkpoint 2")
+        # print(one_name_list)
+        # input()
+        # print("Checkpoint 2")
         for record in one_name_list:
             if record.state in distinctStates:
                 pass
             else:
                 distinctStates.append(record.state)
-        print("Checkpoint 3")
+        # print("Checkpoint 3")
         for state1 in distinctStates:
             for state2 in distinctStates:
                 if state1 < state2:         # This part is EXTREMELY slow. Do something about it.
                     similsForOneName[state1+state2] = abs(one_name_list.filter(state=state1)[0].rspd - one_name_list.filter(state=state2)[0].rspd)
-                    print("Checkpoint 4: finished with combo of " + state1 + " and " + state2 + " for name " + name)
+                    # print("Checkpoint 4: finished with combo of " + state1 + " and " + state2 + " for name " + name)
         allSimils[name] = similsForOneName.copy()
-        print("Checkpoint 5: finished step 1 with name " + name)
+        # print("Checkpoint 5: finished step 1 with name " + name)
 
     # print(allSimils)
     comboSum = 0
@@ -329,8 +356,8 @@ def statePairs(record_list, howMany):
                         comboSum = comboSum + allSimils[name][state1+state2]     # try to get e.g. allSimils['Jay']['KYMO']
                         comboCount = comboCount + 1
                     except:
-                        # pass
-                        print(name, state1+state2, comboSum, comboCount, comboAverage)
+                        pass
+                        # print(name, state1+state2, comboSum, comboCount, comboAverage)
                 try:
                     comboAverage = comboSum/comboCount
                 except:
@@ -344,19 +371,21 @@ def statePairs(record_list, howMany):
                 comboCount = 0
                 comboAverage = "qqq"
 
-    print(differenceList)
+    # print(differenceList)
     differenceList.sort(key=getrspd)
 
     return differenceList
 
-def statePairsOneState(focalState, record_list, howMany):
+def statePairsOneState(focalState, record_list, year, howMany):
     allSimils = {}
     differenceList = []
     # distinctNames = findDistinctNames(record_list)
-    twelveNamesFrom1986 = ["Jessica","Ashley","Amanda","Jennifer","Sarah","Stephanie","Nicole","Brittany","Heather","Elizabeth","Megan","Melissa"]
-    namesToUse = twelveNamesFrom1986[0:howMany]
+    # twelveNamesFrom1986 = ["Jessica","Ashley","Amanda","Jennifer","Sarah","Stephanie","Nicole","Brittany","Heather","Elizabeth","Megan","Melissa"]
+    # namesToUse = twelveNamesFrom1986[0:howMany]
+    namesToUse = calculateMostPopularNames(year,"F",howMany)
     # print("Checkpoint 1")
     for name in namesToUse:
+        print(name)
         if record_list.filter(fname=name).filter(state=focalState):
             distinctStates = []
             similsForOneName = {}
@@ -408,10 +437,25 @@ def statePairsOneState(focalState, record_list, howMany):
 
     return differenceList
 
-def calculateMostPopularNames(record_list, limit):
-    distinctNames = findDistinctNames(record_list)
-    for name in distinctNames:
-        pass
-    topHundredNameList = ["Jessica","Ashley","Amanda","Jennifer","Sarah","Stephanie","Nicole","Brittany","Heather","Elizabeth","Megan","Melissa"]
-    namesToReturn = topHundredNameList[0:limit]
+def calculateMostPopularNames(syear, ssex, limit):
+    with open(os.path.join(settings.BASE_DIR, 'names\static\\names\\top_names_json.json')) as top_names_file:
+        most_popular_names_dictionary = json.load(top_names_file)
+        # print(mostPopularJson)
+
+    # print(most_popular_names_dictionary[syear][])
+    # topHundredNameList = ["Jessica","Ashley","Amanda","Jennifer","Sarah","Stephanie","Nicole","Brittany","Heather","Elizabeth","Megan","Melissa"]
+    # namesToReturn = topHundredNameList[0:limit]
+    namesToReturn = most_popular_names_dictionary[syear][ssex][0:limit]
     return namesToReturn
+
+def simulateRecordList(records_to_be_reformatted):
+    # print(records_to_be_reformatted)
+    reformatted_record_object_list = []
+    for record in records_to_be_reformatted:
+        reformatted_record = Rspdtable()
+        reformatted_record.state = record[0]
+        reformatted_record.rspd = record[1]
+        reformatted_record_object_list.append(reformatted_record)
+    print("Reformatted to:")
+    print(reformatted_record_object_list)
+    return reformatted_record_object_list

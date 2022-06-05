@@ -3,7 +3,7 @@
   <title>Django project!</title>
 
   {% load static %}
-  <link rel="stylesheet" type="text/css" href="{% static 'names/style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
 
   <script>
 
@@ -197,7 +197,16 @@
   {% endif %}
 
   {% if operationID == 5 %}
-      <h1>Operation ID is 5!!!!!!!!!!!!!!</h1>
+    {% if record_list %}                      <!-- if there are any results -->
+      {% for item in maps.items %}                  <!-- go through each record -->
+        <h2>{{ item.0 }} in {{ record_list.0.year }}</h2>
+        <div class="svgDisplay">
+          {{ item.1 | safe }}
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No matching records found.</p>
+    {% endif %}
   {% endif %}
 
 </div>
