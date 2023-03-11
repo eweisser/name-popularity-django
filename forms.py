@@ -6,6 +6,7 @@ class oneNameMapForm(forms.Form):
     search_fname = forms.CharField(label='Name:', max_length=30)
     search_year1 = forms.CharField(label='Starting year:', max_length=4)
     search_year2 = forms.CharField(label='Ending year:', max_length=4)
+    search_animate_choice = forms.ChoiceField(label='', widget=forms.RadioSelect, choices=[('separate','separate maps'),('animated','animated map')])
     search_sexFM = forms.CharField(label='Sex (F/M):', max_length=1)
     # dummy = forms.CharField(label='DUMMY', widget=forms.HiddenInput(), max_length=10, initial="dummy")
 
@@ -14,7 +15,7 @@ class oneNameMapForm(forms.Form):
         data = self.cleaned_data['search_sexFM']
         if data == "A":
             raise ValidationError(_('Invalid sex; must be F or M'))
-        return datas
+        return data
 
     def __init__(self, *args, **kwargs):
         super(oneNameMapForm, self).__init__(*args, **kwargs)
