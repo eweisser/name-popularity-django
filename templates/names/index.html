@@ -59,8 +59,8 @@
   <span class="tab" id="tabOneName" onclick="activateTab('one name')">Map one name</span>
   <span class="tab" id="tabOneState" onclick="activateTab('one state')">List for 1 state/1 year</span>
   <span class="tab" id="tabNum3" onclick="activateTab('num 3')">Map top names for one year</span>
-  <span class="tab" id="tabNum4" onclick="activateTab('num 4')">Which states are most similar?</span>
-  <span class="tab" id="tabNum5" onclick="activateTab('num 5')">Map similarity to one state</span>
+  <span class="tabgray" id="tabNum4" onclick="activateTab('num 4')">Which states are most similar?</span>
+  <span class="tabgray" id="tabNum5" onclick="activateTab('num 5')">Map similarity to one state</span>
 </div>
 
 <div id="interfaceContainer">
@@ -134,11 +134,11 @@
 
 <div id="results">
   {% if operationID == 1 %}
-    {% if record_list %}                      <!-- if there are any results -->
-      {% for item in maps.items %}                  <!-- go through each record -->
-        <h2>{{ record_list.0.fname }} in {{ item.0 }}</h2>
+    {% if maps.items %}                      <!-- if there are any results -->
+      {% for year in maps.items %}                  <!-- go through each map (one per year) -->
+        <!-- <h2>{{ fname }} ({{ year.1.sex }}) in {{ year.0 }}</h2> -->
         <div class="svgDisplay">
-          {{ item.1 |safe}}
+          {{ year.1.map_svg_code |safe}}
         </div>
       {% endfor %}
     {% else %}
