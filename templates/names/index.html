@@ -5,7 +5,38 @@
   {% load static %}
   <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
 
-  <script>
+  <style>
+
+  body {
+    background-color: #ffffff;
+  }
+
+  @keyframes map_animator {
+    0% {background-color: #ff0000; content: {{ 1939.1.map_svg_code }};}
+    33% {background-color: #00ff00; content: "Second";}
+    67% {background-color: #4444ff; content: "Third";}
+  }
+
+  #animatedSvgDisplay:before {
+    content: "Well hello there.";
+    animation-name: map_animator;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-timing-function: step-end;
+  }
+
+  </style>
+
+  <script maps_object={{ maps }}>
+    const maps_keys = Object.keys(document.currentScript);
+    const maps_values = Object.values(document.currentScript);
+    console.log(maps_keys);
+
+    // document.addEventListener("DOMContentLoaded", ready);
+
+  // window.onload = function() {
+  //   alert("Loaded.");
+  // }
 
   function activateTab(tabToActivate) {
     switch(tabToActivate) {
@@ -47,6 +78,33 @@
     }
   }
 
+
+  function ready() {
+
+    // alert("Point 1.")
+    {% if maps %}
+        let id = null;
+        let map_number = 0;
+        clearInterval(id);
+        id = setInterval(frame, 2000);
+        // alert("Point 2.");
+        function frame() {
+          if (map_number == 10) {
+            clearInterval(id);
+          } else {
+            map_number++;
+            console.log("Hello.");
+            // alert( maps_keys );
+            // document.getElementById("animatedSvgDisplay").innerHTML = "{{ maps.1941.map_svg_code |safe}}";
+            document.getElementById("animatedSvgDisplay").innerHTML = "hello";
+          }
+        }
+    {% endif %}
+  }
+
+
+
+
   </script>
 
 </head>
@@ -74,7 +132,7 @@
       <input type="submit" name="submitButtonForm1" value="Submit">
     </form>
 
-    Leave both <b>year</b> fields blank to get data from entire available range. Leave one <b>year</b> field blank to make a map for data from one year only.<br><br>
+    Leave one <b>year</b> field blank to make a map for data from one year only.<br><br>
 
   </div>
 
@@ -134,16 +192,28 @@
 
 <div id="results">
   {% if operationID == 1 %}
-    {% if maps.items %}                      <!-- if there are any results -->
-      {% for year in maps.items %}                  <!-- go through each map (one per year) -->
-        <!-- <h2>{{ fname }} ({{ year.1.sex }}) in {{ year.0 }}</h2> -->
-        <div class="svgDisplay">
-          {{ year.1.map_svg_code |safe}}
-        </div>
-      {% endfor %}
-    {% else %}
-      <p>No matching records found.</p>
-    {% endif %}
+      {% if maps.items %}                      <!-- if there are any results -->
+
+
+          {% if animate_choice == "separate" %}     <!-- if the user chose not to animate the maps -->
+              {% for year in maps.items %}                  <!-- go through each map (one per year) -->
+                <!-- <h2>{{ fname }} ({{ year.1.sex }}) in {{ year.0 }}</h2> -->
+                  <div class="svgDisplay">
+                      {{ year.1.map_svg_code |safe}}
+                  </div>
+              {% endfor %}
+
+          {% else %}
+
+              <div id="animatedSvgDisplay">
+                  <!-- <h1>Animated maps will go here.</h1> -->
+              </div>
+
+          {% endif %}
+
+      {% else %}
+          <p>No matching records found.</p>
+      {% endif %}
   {% endif %}
 
   {% if operationID == 2 %}
