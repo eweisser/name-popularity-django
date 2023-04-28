@@ -126,10 +126,10 @@
 
     <h3>Make a still or animated map for one name</h3>
 
-    <form action="" method="POST">
-      {% csrf_token %}
-      {{ form1 }}
-      <input type="submit" name="submitButtonForm1" value="Submit">
+    <form action="{% url 'names:map-from-one-name' question.id %}" method="POST">
+        {% csrf_token %}
+        {{ form1 }}
+        <input type="submit" name="submitButtonForm1" value="Submit">
     </form>
 
     Leave one <b>year</b> field blank to make a map for data from one year only.<br><br>
