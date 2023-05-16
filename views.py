@@ -52,6 +52,7 @@ def index(request):
             syear1 = 2020
             syear2 = 2020
 
+        templateToGet = 'names/index.html'
 
         if "submitButtonForm1" in request.POST:
             context = map_from_one_name_NYYS(request, sfname, int(syear1), int(syear2), ssex, animate_choice)
@@ -60,6 +61,7 @@ def index(request):
             print("Still to work on: Animated .gif maps?")
             print("Still to work on: 5 year rolling average")
             print("Still to work on: legend/scale on maps")
+            templateToGet = 'names/map_from_one_name.html'
 
 
         if "submitButtonForm2" in request.POST:
@@ -183,7 +185,10 @@ def index(request):
         #     context['operationID'] = 5
 
         print("Still to work on: For every map, check if sex/gender limiter works, but for some operations, this is more central.")
-        templateToGet = 'names/index.html'
+
+        print()
+        print(context)
+        print()
 
         return render(request, templateToGet, context)
     else:

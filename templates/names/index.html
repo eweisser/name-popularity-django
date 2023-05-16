@@ -126,7 +126,7 @@
 
     <h3>Make a still or animated map for one name</h3>
 
-    <form action="{% url 'names:map-from-one-name' question.id %}" method="POST">
+    <form action="{% url 'names:map-from-one-name' %}" method="POST">
         {% csrf_token %}
         {{ form1 }}
         <input type="submit" name="submitButtonForm1" value="Submit">
