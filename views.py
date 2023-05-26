@@ -159,14 +159,14 @@ def index(request):
         #     context['maps'] = {}
         #     for nameToMap in getMostPopularNames:
         #         svgInsert = svgCodeGenerator(record_list.filter(fname=nameToMap),nameToMap)
-        #         svgFile = svgFileGenerator(svgInsert,nameToMap,record_list.filter(fname=nameToMap))
+        #         svgFile = svgFileGenerator(svgInsert,nameToMap,record_list.filter(fname=nameToMap),animate_choice)
         #         context['maps'][str(nameToMap)] = svgFile
 
         # if "submitButtonForm5" in request.POST:
         #     context['maps'] = {}
         #     record_list = simulateRecordList(differenceList)
         #     svgInsert = svgCodeGenerator(record_list,str(syear1))
-        #     svgFile = svgFileGenerator(svgInsert,str(syear1),record_list)
+        #     svgFile = svgFileGenerator(svgInsert,str(syear1),record_list,animate_choice)
         #     context['maps'][str(syear1)] = svgFile
 
 
@@ -187,7 +187,7 @@ def index(request):
         print("Still to work on: For every map, check if sex/gender limiter works, but for some operations, this is more central.")
 
         print()
-        print(context)
+        # print(context)
         print()
 
         return render(request, templateToGet, context)
@@ -218,6 +218,8 @@ def check_gender_ratio(record_list):
 
 ############################################################################
 
+# "operation 1"
+
 def map_from_one_name_NYYS(request, name_input, year_start_input, year_end_input, sex_input, animate_choice):
 
     print("Name is:", name_input)
@@ -227,6 +229,7 @@ def map_from_one_name_NYYS(request, name_input, year_start_input, year_end_input
     context = {}
     context['fname'] = name_input
     context['maps'] = {}
+    context['animation_code'] = {}
     context['animate_choice'] = animate_choice
     print()
     print("Animate choice is:")
@@ -241,7 +244,7 @@ def map_from_one_name_NYYS(request, name_input, year_start_input, year_end_input
             else:
                 year_record_list = check_gender_ratio(year_record_list)
             svgInsert = svgCodeGenerator(year_record_list,str(yearToMap))
-            svgFile = svgFileGenerator(svgInsert,str(yearToMap),year_record_list)
+            svgFile = svgFileGenerator(svgInsert,str(yearToMap),year_record_list,animate_choice)
 
             context['maps'][str(yearToMap)] = {}
             context['maps'][str(yearToMap)]['map_svg_code'] = svgFile
@@ -256,12 +259,18 @@ def map_from_one_name_NYYS(request, name_input, year_start_input, year_end_input
             else:
                 year_record_list = check_gender_ratio(year_record_list)
             svgInsert = svgCodeGenerator(year_record_list,str(yearToMap))
-            svgFile = svgFileGenerator(svgInsert,str(yearToMap),year_record_list)
+            svgFile = svgFileGenerator(svgInsert,str(year_start_input)+str(yearToMap),year_record_list,animate_choice)
 
             context['maps'][str(yearToMap)] = {}
             context['maps'][str(yearToMap)]['map_svg_code'] = svgFile
             if year_record_list.count() > 0:
                 context['maps'][str(yearToMap)]['sex'] = year_record_list[0].sex
+
+        context['animation_code']['fraction'] = str(100/len(context['maps'])) + "%"
+        context['animation_code']['animation_length'] = str(len(context['maps'])) + "s"
+        context['animation_code']['animation_delays'] = ""
+        for i in range(len(context['maps'])):
+            context['animation_code']['animation_delays'] = context['animation_code']['animation_delays'] + ".map" + str(i+1) + " {animation-delay: " + str(i) + "s;}"
 
         print()
         print("Context[maps].keys is:")
@@ -288,6 +297,8 @@ def map_from_one_name_NYYS(request, name_input, year_start_input, year_end_input
 
 ############################################################################
 
+# "operation 2"
+
 def list_from_one_state_and_year_SY(request, state_input, year_input):
 
     record_list = Rspdtable.objects.all()
@@ -304,6 +315,8 @@ def list_from_one_state_and_year_S(request, state_input):
 
 ############################################################################
 
+# "operation 3"
+
 def map_most_popular_names_YSX(request, year_input, sex_input, number_of_results):
 
     record_list = Rspdtable.objects.all()
@@ -318,7 +331,7 @@ def map_most_popular_names_YSX(request, year_input, sex_input, number_of_results
     context['maps'] = {}
     for nameToMap in getMostPopularNames:
         svgInsert = svgCodeGenerator(record_list.filter(fname=nameToMap),nameToMap)
-        svgFile = svgFileGenerator(svgInsert,nameToMap,record_list.filter(fname=nameToMap))
+        svgFile = svgFileGenerator(svgInsert,nameToMap,record_list.filter(fname=nameToMap),animate_choice)
         context['maps'][str(nameToMap)] = svgFile
 
     return render(request, "names/map_most_popular_names.html", context)
@@ -333,6 +346,8 @@ def map_most_popular_names_Y(request, year_input):
     return map_most_popular_names_YSX(request, year_input, "F", 1)
 
 ############################################################################
+
+# "operation 4"
 
 def list_comparing_states_from_one_year_YX(request, year_input, number_of_names_to_use):
 
@@ -350,6 +365,8 @@ def list_comparing_states_from_one_year_Y(request, year_input):
     return list_comparing_states_from_one_year_YX(request, year_input, 1)
 
 ############################################################################
+
+# "operation 5"
 
 def map_comparing_states_from_state_SYX(request, state_input, year_input, number_of_names):
 
@@ -374,7 +391,7 @@ def map_comparing_states_from_state_SYX(request, state_input, year_input, number
     # print("Right here!!!")
     # print(svgInsert)
 
-    svgFile = svgFileGenerator(svgInsert,str(year_input),record_list)
+    svgFile = svgFileGenerator(svgInsert,str(year_input),record_list,animate_choice)
     context['maps'][str(year_input)] = svgFile
 
     return render(request, "names/map_comparing_states_from_state.html", context)
@@ -389,6 +406,8 @@ def map_comparing_states_from_state_S(request, state_input):
     return map_comparing_states_from_state_SYX(request, state_input, 2020, 1)
 
 ############################################################################
+
+# "operation 6"
 
 def list_of_names_with_similar_distribution_NYSX(request, name_year_list_input, target_year_input, sex_input, number_of_names):
 
@@ -589,15 +608,19 @@ def svgCodeGenerator(record_list, uniquifier):
 
 
 
-def svgFileGenerator(svgInsert, uniquifier, record_list):
+def svgFileGenerator(svgInsert, uniquifier, record_list, animate_choice):
 
     reduced_record_list = {}
-    if len(uniquifier) == 8:
-        end_year = uniquifier[4:8]
-        uniquifier = uniquifier[0:4]
-        years = range(int(uniquifier),int(end_year)+1)
-        print("Years:")
-        print(years)
+    if animate_choice == "animated":
+        first_year = uniquifier[0:4]
+        map_year = uniquifier[4:8]
+
+    # if len(uniquifier) == 8:
+    #     end_year = uniquifier[4:8]
+    #     uniquifier = uniquifier[0:4]
+    #     years = range(int(uniquifier),int(end_year)+1)
+    #     print("Years:")
+    #     print(years)
 
     for record in record_list:
         reduced_record_list[record.state] = str(record.rspd)
@@ -606,7 +629,18 @@ def svgFileGenerator(svgInsert, uniquifier, record_list):
             reduced_record_list[state] = "n/a"
             # width="66.666667%" viewbox="0 0 959 593"
 
-    codePartOne = '<svg style="" width="80%" viewbox="0 -50 1100 750" xmlns="http://www.w3.org/2000/svg">\n<title>Blank map of the United States, territories not included</title>\n<defs>\n<style type="text/css">\n.state {fill:#404040}\n.borders {stroke:#000000; stroke-width:1;}\n.dccircle {display:none;}\n.separator1 {stroke:#FFFFFF; stroke-width:0;} \n\n'
+    codePartOne = '<svg '
+    if animate_choice == "animated":
+        codePartOne = codePartOne + 'class="map' + str( int(map_year)-int(first_year)+1 ) + ' '
+        codePartOne = codePartOne + ' mapframe" visibility="hidden" '
+
+    if animate_choice == "animated":
+        uniquifier = map_year
+
+    if animate_choice == "separate":
+        codePartOne = codePartOne + 'width="80%" '
+
+    codePartOne = codePartOne + 'style="" viewbox="0 -50 1100 750" xmlns="http://www.w3.org/2000/svg">\n<title>Blank map of the United States, territories not included</title>\n<defs>\n<style type="text/css">\n.state {fill:#404040}\n.borders {stroke:#000000; stroke-width:1;}\n.dccircle {display:none;}\n.separator1 {stroke:#FFFFFF; stroke-width:0;} \n\n'
 
     # Modified codePartTwo on January 23, 2023. Used to be like this: +get_rspd_from_record(record_list.filter(state="AL"))+
     # but that didn't work when we were using calculated values not from actual records

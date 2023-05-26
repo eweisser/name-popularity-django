@@ -5,6 +5,17 @@
   {% load static %}
   <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
 
+  <style>
+    @keyframes cycle {
+      0% {visibility: hidden;}
+      {{ animation_code.fraction }} {visibility: visible;}
+    }
+    .mapframe {
+      animation: cycle {{ animation_code.animation_length }} step-start infinite;
+    }
+    {{ animation_code.animation_delays }}
+  </style>
+
   <script>
 
   function activateTab(tabToActivate) {
@@ -147,23 +158,12 @@
       {% else %}
 
           <div id="animatedSvgDisplay">
-              <!-- <h1>Animated maps will go here.</h1> -->
-              <svg height="300px" width="300px">
-                <style>
-                  @keyframes cycle {
-                    50% {visibility: visible;}
-                    100% {visibility: hidden;}
-                  }
-                  .mapframe {
-                    animation: cycle 2s step-start infinite;
-                  }
-                  .map01 {animation-delay: 0s;}
-                  .map02 {animation-delay: 1s;}
-                </style>
-                <g class="map01 mapframe"><rect x="20" y="20" width="100" height="100" fill="#FF0000" stroke="#000000" stroke-width="5" /></g>
-                <g class="map02 mapframe" visibility="hidden"><rect x="20" y="20" width="100" height="100" fill="#00FFFF" stroke="#000000" stroke-width="5" /></g>
-              </svg>
-
+            <svg width="80%" viewbox="0 -50 1100 750">
+              {% for year in maps.items %}
+                      {{ year.1.map_svg_code | safe }}
+              {% endfor %}
+              <!-- <rect width="100%" height="100%" fill="#FFCC55" /> -->
+            </svg>
           </div>
 
       {% endif %}
