@@ -27,6 +27,11 @@ class oneStateNameReportForm(forms.Form):
     search_state = forms.CharField(label='State:', max_length=2)
     search_year1 = forms.CharField(label='Year:', max_length=4)
 
+    def __init__(self, *args, **kwargs):
+        super(oneStateNameReportForm, self).__init__(*args, **kwargs)
+        self.fields['search_state'].required = True
+        self.fields['search_year1'].required = True
+
 class oneYearHundredNamesMapForm(forms.Form):
     search_year1 = forms.CharField(label='Year:', max_length=4)
     search_sexFM = forms.CharField(label='Sex:', max_length=1)

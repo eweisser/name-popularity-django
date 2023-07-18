@@ -34,6 +34,7 @@ def index(request):
         }
         return render(request, 'names/index.html', context)
     elif request.method == 'POST':
+        print("******************** This was the result of a form submission.")
 
         sfname = request.POST.get('search_fname','')
         syear1 = request.POST.get('search_year1','')
@@ -55,23 +56,34 @@ def index(request):
         templateToGet = 'names/index.html'
 
         if "submitButtonForm1" in request.POST:
+            print("Form 1 was submitted.")
             context = map_from_one_name_NYYS(request, sfname, int(syear1), int(syear2), ssex, animate_choice)
             context['form1'] = oneNameMapForm(request.POST).as_p()
+            context['form2'] = form2.as_p()
+            context['form3'] = form3.as_p()
             context['operationID'] = 1
-            print("Still to work on: Animated .gif maps?")
             print("Still to work on: 5 year rolling average")
-            print("Still to work on: legend/scale on maps")
             templateToGet = 'names/map_from_one_name.html'
 
 
         if "submitButtonForm2" in request.POST:
             print("Form 2 was submitted.")
-            form = oneStateNameReportForm(request.POST)
+            context = list_from_one_state_and_year_SY(request, sstate, int(syear1))
+            context['form1'] = form1.as_p()
+            context['form2'] = oneStateNameReportForm(request.POST).as_p()
+            context['form3'] = form3.as_p()
+            context['operationID'] = 2
+            templateToGet = 'names/list_from_one_state_and_year.html'
 
 
         if "submitButtonForm3" in request.POST:
             print("Form 3 was submitted.")
-            form = oneYearHundredNamesMapForm(request.POST)
+            context = map_most_popular_names_YSX(request, int(syear1), ssex, snumLimit)
+            context['form1'] = form1.as_p()
+            context['form2'] = form2.as_p()
+            context['form3'] = oneYearHundredNamesMapForm(request.POST).as_p()
+            context['operationID'] = 3
+            templateToGet = 'names/map_most_popular_names.html'
 
 
         # if "submitButtonForm4" in request.POST:
@@ -84,10 +96,10 @@ def index(request):
         #     form = allStatesToOneStateMapForm(request.POST)
 
         # context['form1'] = form1.as_p()
-        context['form2'] = form2.as_p()
-        context['form3'] = form3.as_p()
-        context['form4'] = form4.as_p()
-        context['form5'] = form5.as_p()
+        # context['form2'] = form2.as_p()
+        # context['form3'] = form3.as_p()
+        # context['form4'] = form4.as_p()
+        # context['form5'] = form5.as_p()
 
 
         # if sfname:                          # only operation 1 does this (#1-4)
@@ -170,11 +182,11 @@ def index(request):
         #     context['maps'][str(syear1)] = svgFile
 
 
-        if "submitButtonForm2" in request.POST:
-            context['operationID'] = 2
+        # if "submitButtonForm2" in request.POST:
+            # context['operationID'] = 2
             # templateToGet = 'names/oneStateNameReport.html'
-        elif "submitButtonForm3" in request.POST:
-            context['operationID'] = 3
+        # elif "submitButtonForm3" in request.POST:
+            # context['operationID'] = 3
             # templateToGet = 'names/oneYearHundredNamesMap.html'
         # elif "submitButtonForm4" in request.POST:
         #     context['operationID'] = 4
@@ -301,6 +313,8 @@ def map_from_one_name_NYYS(request, name_input, year_start_input, year_end_input
 
 def list_from_one_state_and_year_SY(request, state_input, year_input):
 
+    context = {}
+
     record_list = Rspdtable.objects.all()
     record_list = record_list.filter(year=year_input)
     record_list = record_list.filter(state=state_input)
@@ -308,7 +322,7 @@ def list_from_one_state_and_year_SY(request, state_input, year_input):
 
     context = {'record_list': record_list}
 
-    return render(request, "names/list_from_one_state_and_year.html", context)
+    return context
 
 def list_from_one_state_and_year_S(request, state_input):
     return list_from_one_state_and_year_SY(request, state_input, 2020)
@@ -331,10 +345,10 @@ def map_most_popular_names_YSX(request, year_input, sex_input, number_of_results
     context['maps'] = {}
     for nameToMap in getMostPopularNames:
         svgInsert = svgCodeGenerator(record_list.filter(fname=nameToMap),nameToMap)
-        svgFile = svgFileGenerator(svgInsert,nameToMap,record_list.filter(fname=nameToMap),animate_choice)
+        svgFile = svgFileGenerator(svgInsert,nameToMap,record_list.filter(fname=nameToMap),"separate")
         context['maps'][str(nameToMap)] = svgFile
 
-    return render(request, "names/map_most_popular_names.html", context)
+    return context
 
 def map_most_popular_names_YS(request, year_input, sex_input):
     return map_most_popular_names_YSX(request, year_input, sex_input, 1)
@@ -529,12 +543,7 @@ def svgCodeGenerator(record_list, uniquifier):
     svgInsert = ""
 
     for record in record_list:
-        # print(record)
-        # print(record.year)
-        # print(record.state)
-        # print(record.fname)
-        # print(record.rspd)
-        # print()
+
         stateAndYear = record.state + uniquifier
         if record.rspd > 1.75:
             red4.append(stateAndYear)
@@ -601,12 +610,10 @@ def svgCodeGenerator(record_list, uniquifier):
         svgInsert = svgInsert[0:len(svgInsert)-1]
         svgInsert = svgInsert + " {fill:#0000ff}\n"
     svgInsert = svgInsert + "\n\n"
-    # print(svgInsert)
+
     return svgInsert
 
-
-
-
+############################################################################
 
 def svgFileGenerator(svgInsert, uniquifier, record_list, animate_choice):
 
@@ -695,22 +702,19 @@ def statePairs(record_list, year, howMany):
         distinctStates = []
         similsForOneName = {}
         one_name_list = record_list.filter(fname=name)
-        # print(one_name_list)
-        # input()
-        # print("Checkpoint 2")
+
         for record in one_name_list:
             if record.state in distinctStates:
                 pass
             else:
                 distinctStates.append(record.state)
-        # print("Checkpoint 3")
+
         for state1 in distinctStates:
             for state2 in distinctStates:
                 if state1 < state2:         # This part is EXTREMELY slow. Do something about it.
                     similsForOneName[state1+state2] = abs(one_name_list.filter(state=state1)[0].rspd - one_name_list.filter(state=state2)[0].rspd)
                     # print("Checkpoint 4: finished with combo of " + state1 + " and " + state2 + " for name " + name)
         allSimils[name] = similsForOneName.copy()
-        # print("Checkpoint 5: finished step 1 with name " + name)
 
     # print(allSimils)
     comboSum = 0
@@ -745,6 +749,8 @@ def statePairs(record_list, year, howMany):
 
     return differenceList
 
+############################################################################
+
 def statePairsOneState(focalState, record_list, year, howMany):
     allSimils = {}
     differenceList = []
@@ -754,10 +760,6 @@ def statePairsOneState(focalState, record_list, year, howMany):
 
     namesToUse = calculateMostPopularNames(year,"F",howMany)
 
-    # print()
-    # print("Jan 23 7:39 pm:")
-    # print(namesToUse)
-    # print()
 
     for name in namesToUse:
         # print(name)
@@ -770,11 +772,11 @@ def statePairsOneState(focalState, record_list, year, howMany):
                     pass
                 else:
                     distinctStates.append(record.state)
-            # print("Checkpoint 3")
+
             focalStateRSPD = one_name_list.filter(state=focalState)[0].rspd
             for nonFocalState in distinctStates:
                 similsForOneName[focalState+nonFocalState] = abs(focalStateRSPD - one_name_list.filter(state=nonFocalState)[0].rspd)
-                # print("Checkpoint 4: finished with combo of " + state1 + " and " + state2 + " for name " + name)
+
             allSimils[name] = similsForOneName.copy()
             # print("Checkpoint 5: finished step 1 with name " + name)
         else:
@@ -794,7 +796,7 @@ def statePairsOneState(focalState, record_list, year, howMany):
                 comboCount = comboCount + 1
             except:
                 pass
-                # print(name, focalState+nonFocalState, comboSum, comboCount, comboAverage)
+
         try:
             comboAverage = comboSum/comboCount
         except:
@@ -808,23 +810,31 @@ def statePairsOneState(focalState, record_list, year, howMany):
         comboCount = 0
         comboAverage = "qqq"
 
-    # print(differenceList)
-
     return differenceList
+
+############################################################################
 
 def calculateMostPopularNames(syear, ssex, limit):
     if syear == 1986:
         topHundredNameList = ["Jessica","Ashley","Amanda","Jennifer","Sarah","Stephanie","Nicole","Brittany","Heather","Elizabeth","Megan","Melissa"]
         namesToReturn = topHundredNameList[0:limit]
     else:
+        print("going with 'else'...")
         with open(os.path.join(settings.BASE_DIR, 'names\static\\names\\top_names_json.json')) as top_names_file:
             most_popular_names_dictionary = json.load(top_names_file)
         # print(mostPopularJson)
 
+        # print("")
+        # print("This is 'most_popular_names_dictionary' > year > sex:")
+        # print(most_popular_names_dictionary[syear][ssex])
+        # print()
 
-        namesToReturn = most_popular_names_dictionary[syear][ssex][0:limit]
+        namesToReturn = most_popular_names_dictionary[syear][ssex][0:int(limit)]
+        
 
     return namesToReturn
+
+############################################################################
 
 def simulateRecordList(records_to_be_reformatted):
 
@@ -836,6 +846,8 @@ def simulateRecordList(records_to_be_reformatted):
         reformatted_record_object_list.append(reformatted_record)
 
     return reformatted_record_object_list
+
+############################################################################
 
 def get_rspd_from_record(recordset):
     if recordset:

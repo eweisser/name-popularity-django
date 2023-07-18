@@ -31,25 +31,25 @@ div#oneNameMap {
 
 div#oneStateNameReport {
   background-color: #F4F4FF;
-  display: none;
+  /* display: none; */
   /* padding: 1px 20px 0 10px; */
 }
 
 div#oneYearHundredNamesMap {
   background-color: #FFF4FF;
-  display: none;
+  /* display: none; */
   /* padding: 1px 20px 0 10px; */
 }
 
 div#oneYearAllStatesComparisonReport {
   background-color: #FFF0F0;
-  display: none;
+  /* display: none; */
   /* padding: 1px 20px 0 10px; */
 }
 
 div#allStatesToOneStateMap {
   /* background-color: #FFF8F0; */
-  display: none;
+  /* display: none; */
   /* padding: 1px 20px 0 10px; */
 }
 
