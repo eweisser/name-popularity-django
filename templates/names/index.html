@@ -7,6 +7,22 @@
 
   <style>
 
+      #oneNameMap {
+        display: block;
+      }
+      #oneStateNameReport {
+        display: none;
+      }
+      #oneYearHundredNamesMap {
+        display: none;
+      }
+      #oneYearAllStatesComparisonReport {
+        display: none;
+      }
+      #allStatesToOneStateMap {
+        display: none;
+      }
+
   body {
     background-color: #ffffff;
   }
@@ -126,10 +142,10 @@
 
     <h3>Make a still or animated map for one name</h3>
 
-    <form action="" method="POST">
-      {% csrf_token %}
-      {{ form1 }}
-      <input type="submit" name="submitButtonForm1" value="Submit">
+    <form action="{% url 'names:map-from-one-name' %}" method="POST">
+        {% csrf_token %}
+        {{ form1 }}
+        <input type="submit" name="submitButtonForm1" value="Submit">
     </form>
 
     Leave one <b>year</b> field blank to make a map for data from one year only.<br><br>

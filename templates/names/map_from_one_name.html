@@ -1,0 +1,196 @@
+<html>
+<head>
+  <title>Template for operation 1</title>
+
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+
+  <style>
+
+      #oneNameMap {
+        display: block;
+      }
+      #oneStateNameReport {
+        display: none;
+      }
+      #oneYearHundredNamesMap {
+        display: none;
+      }
+      #oneYearAllStatesComparisonReport {
+        display: none;
+      }
+      #allStatesToOneStateMap {
+        display: none;
+      }
+
+    @keyframes cycle {
+      0% {visibility: hidden;}
+      {{ animation_code.fraction }} {visibility: visible;}
+    }
+    .mapframe {
+      animation: cycle {{ animation_code.animation_length }} step-start infinite;
+    }
+    {{ animation_code.animation_delays }}
+  </style>
+
+  <script>
+
+  function activateTab(tabToActivate) {
+    switch(tabToActivate) {
+      case 'one name':
+        document.getElementById("oneNameMap").style.display = "block";
+        document.getElementById("oneStateNameReport").style.display = "none";
+        document.getElementById("oneYearHundredNamesMap").style.display = "none";
+        document.getElementById("oneYearAllStatesComparisonReport").style.display = "none";
+        document.getElementById("allStatesToOneStateMap").style.display = "none";
+        break;
+      case 'one state':
+        document.getElementById("oneNameMap").style.display = "none";
+        document.getElementById("oneStateNameReport").style.display = "block";
+        document.getElementById("oneYearHundredNamesMap").style.display = "none";
+        document.getElementById("oneYearAllStatesComparisonReport").style.display = "none";
+        document.getElementById("allStatesToOneStateMap").style.display = "none";
+        break;
+      case 'num 3':
+        document.getElementById("oneNameMap").style.display = "none";
+        document.getElementById("oneStateNameReport").style.display = "none";
+        document.getElementById("oneYearHundredNamesMap").style.display = "block";
+        document.getElementById("oneYearAllStatesComparisonReport").style.display = "none";
+        document.getElementById("allStatesToOneStateMap").style.display = "none";
+        break;
+      case 'num 4':
+        document.getElementById("oneNameMap").style.display = "none";
+        document.getElementById("oneStateNameReport").style.display = "none";
+        document.getElementById("oneYearHundredNamesMap").style.display = "none";
+        document.getElementById("oneYearAllStatesComparisonReport").style.display = "block";
+        document.getElementById("allStatesToOneStateMap").style.display = "none";
+        break;
+      case 'num 5':
+        document.getElementById("oneNameMap").style.display = "none";
+        document.getElementById("oneStateNameReport").style.display = "none";
+        document.getElementById("oneYearHundredNamesMap").style.display = "none";
+        document.getElementById("oneYearAllStatesComparisonReport").style.display = "none";
+        document.getElementById("allStatesToOneStateMap").style.display = "block";
+        break;
+    }
+  }
+
+  </script>
+
+</head>
+
+<body>
+
+<h1>The first names project</h1>
+
+<div id="tabContainer">
+  <span class="tab" id="tabOneName" onclick="activateTab('one name')">Map one name</span>
+  <span class="tab" id="tabOneState" onclick="activateTab('one state')">List for 1 state/1 year</span>
+  <span class="tab" id="tabNum3" onclick="activateTab('num 3')">Map top names for one year</span>
+  <span class="tab" id="tabNum4" onclick="activateTab('num 4')">Which states are most similar?</span>
+  <span class="tab" id="tabNum5" onclick="activateTab('num 5')">Map similarity to one state</span>
+</div>
+
+<div id="interfaceContainer">
+  <div class="interface" id="oneNameMap">
+
+    <h3>Make a still or animated map for one name</h3>
+
+    <form action="" method="POST">
+      {% csrf_token %}
+      {{ form1 }}
+      <input type="submit" name="submitButtonForm1" value="Submit">
+    </form>
+
+    Leave both <b>year</b> fields blank to get data from entire available range. Leave one <b>year</b> field blank to make a map for data from one year only.<br><br>
+
+  </div>
+
+  <div class="interface" id="oneStateNameReport">
+
+    <h3>List the RSPD values for one state in one year</h3>
+
+    <form action="" method="POST">
+      {% csrf_token %}
+      {{ form2 }}
+      <input type="submit" name="submitButtonForm2" value="Submit">
+    </form>
+
+    Leave <b>sex</b> field blank to get all names.<br><br>
+
+  </div>
+
+  <div class="interface" id="oneYearHundredNamesMap">
+
+    <h3>Make maps showing the distribution of the top names for one year</h3>
+
+    <form action="" method="POST">
+      {% csrf_token %}
+      {{ form3 }}
+      <input type="submit" name="submitButtonForm3" value="Submit">
+    </form>
+
+  </div>
+
+  <div class="interface" id="oneYearAllStatesComparisonReport">
+
+    <h3>Get a table comparing each state to each other state in one year</h3>
+
+    <form action="" method="POST">
+      {% csrf_token %}
+      {{ form4 }}
+      <input type="submit" name="submitButtonForm4" value="Submit">
+    </form>
+
+    This operation requires time-consuming statistical analysis; I recommend using no more than ten names for it.<br><br>
+
+  </div>
+
+  <div class="interface" id="allStatesToOneStateMap">
+
+    <h3>Make a map comparing each state's naming patterns to one focal state</h3>
+
+    <form action="" method="POST">
+      {% csrf_token %}
+      {{ form5 }}
+      <input type="submit" name="submitButtonForm5" value="Submit">
+    </form>
+
+  </div>
+</div>
+
+
+<div id="results">
+  {% if maps.items %}                      <!-- if there are any results -->
+
+
+      {% if animate_choice == "separate" %}     <!-- if the user chose not to animate the maps -->
+          {% for year in maps.items %}                  <!-- go through each map (one per year) -->
+            <!-- <h2>{{ fname }} ({{ year.1.sex }}) in {{ year.0 }}</h2> -->
+              <div class="svgDisplay">
+                  {{ year.1.map_svg_code |safe}}
+              </div>
+          {% endfor %}
+
+      {% else %}
+
+          <div id="animatedSvgDisplay">
+            <svg width="80%" viewbox="0 -50 1100 750">
+              {% for year in maps.items %}
+                      {{ year.1.map_svg_code | safe }}
+              {% endfor %}
+              <!-- <rect width="100%" height="100%" fill="#FFCC55" /> -->
+            </svg>
+          </div>
+
+      {% endif %}
+
+  {% else %}
+      <p>No matching records found.</p>
+  {% endif %}
+
+</div>
+
+
+</body>
+</html>
